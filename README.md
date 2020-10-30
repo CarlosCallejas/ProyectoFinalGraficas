@@ -5,7 +5,7 @@ Cristian I. Bravo Contreras-A01423382
 Juan Diego Bastidas Santivañez-A01423502
 
 ## Requerimientos funcionales
-Markup: 1. Simular la funcionalidad de un xilofono de 8 teclas
+1. Simular la funcionalidad de un xilofono de 8 teclas
 2. Cada minuto cambiará la ambientación de la escena
 3. Cada nota del xilofono generara un efecto de postprocesamiento en un segmento de un plano en el centro de la escena
 4. Habrá un personaje bailando sobre el plano mientras el usuario toca el xilofono
@@ -14,8 +14,8 @@ Markup: 1. Simular la funcionalidad de un xilofono de 8 teclas
 
 ## Resolucion de los requerimientos 
 1.  Para la funcionalidad del xilofono utilizaremos la Web audio API junto con THREEjs para reproducir los sonidos
-  1. Para mostrar el xilofono se ocuparan objetos 3d
-  1. Se podrá interactuar con el xilofono con el mouse
+    1. Para mostrar el xilofono se ocuparan objetos 3d
+    2. Se podrá interactuar con el xilofono con el mouse
 2. Para el cambio de ambientación se aplicara un cambio en las luces de la escena
 3. Se utilizarán los efectos de post procesamiento unreal bloom de THREEjs para los planos 
 4. Se buscara un modelo humanoide en 3d con huesos para hacer la animación
