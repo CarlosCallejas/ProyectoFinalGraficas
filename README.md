@@ -5,7 +5,7 @@ Cristian I. Bravo Contreras-A01423382
 Juan Diego Bastidas Santivañez-A01423502
 
 ## Requerimientos funcionales
-1. Simular la funcionalidad de un xilofono de 8 teclas
+Markup: 1. Simular la funcionalidad de un xilofono de 8 teclas
 2. Cada minuto cambiará la ambientación de la escena
 3. Cada nota del xilofono generara un efecto de postprocesamiento en un segmento de un plano en el centro de la escena
 4. Habrá un personaje bailando sobre el plano mientras el usuario toca el xilofono
