@@ -1,8 +1,10 @@
 # ProyectoFinalGraficas
 Equipo:
-Carlos E. Callejas Mier-A01423262
-Cristian I. Bravo Contreras-A01423382
-Juan Diego Bastidas Santivañez-A01423502
+            Nombre             |   Matricula
+------------------------------ | -------------
+Carlos E. Callejas Mier        |  A01423262
+Cristian I. Bravo Contreras    |  A01423382
+Juan Diego Bastidas Santivañez |  A01423502
 
 ## Requerimientos funcionales
 1. Simular la funcionalidad de un xilofono de 8 teclas
