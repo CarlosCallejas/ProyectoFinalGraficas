@@ -11,6 +11,7 @@ Juan Diego Bastidas Santivañez |  A01423502
 2. Cada minuto cambiará la ambientación de la escena
 3. Cada nota del xilofono generara un efecto de postprocesamiento en un segmento de un plano en el centro de la escena
 4. Habrá un personaje bailando sobre el plano mientras el usuario toca el xilofono
+   1. El personaje solo bailará mientras el usuario esta tocando el xilofono
 5. La ambientacion de la escena utilizara efectos de postProcesamiento y Skybox
 6. El usuario podrá interactuar con el xilofono con el mouse
 
