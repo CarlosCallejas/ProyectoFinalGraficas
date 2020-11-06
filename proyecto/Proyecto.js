@@ -116,7 +116,7 @@ function run()
     orbitControls.update();
 }
 function setBackgroundMusic(){
-    //Cargar un sonido y configurarlo como el Audio Object's buffer
+    //Cargar un sonido como background y configurarlo como el Audio Object's buffer
     //Como es musica para background se reproduce en bucle
     audioLoader.load( '../sounds/background.mp3', function( buffer ) {
         sound.setBuffer( buffer );
@@ -193,10 +193,15 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
-    listener = new THREE.AudioListener();
+    //Se incializa un listener para el audio
+    listener = new THREE.AudioListener(); 
+     //Se inicializa el loader para cargar los sonidos
     audioLoader = new THREE.AudioLoader();
-    camera.add( listener ); //Se añade el listener a la camara
-    sound = new THREE.Audio( listener );
+    //Se inicializa una variable global llamada Sound que controla un sonido
+    sound = new THREE.Audio( listener ); 
+    //Se añade el listener a la camara
+    camera.add( listener ); 
+ 
     // Set background music
     setBackgroundMusic();
     // Create the objects
