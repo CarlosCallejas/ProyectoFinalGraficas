@@ -10,7 +10,7 @@ mixer = null;
 let duration = 20000; // ms
 let currentTime = Date.now();
 let dancers = [];
-
+let listener, audioLoader, sound =  null;
 let directionalLight = null;
 let spotLight = null;
 let ambientLight = null;
@@ -36,7 +36,7 @@ async function loadFBX()
     let loader = promisifyLoader(new THREE.FBXLoader());
 
     try{
-        let object = await loader.load( anim1);
+        let object = await loader.load( anim5);
         object.mixer = new THREE.AnimationMixer( scene );
         let action = object.mixer.clipAction( object.animations[ 0 ], object );
         object.scale.set(0.3, 0.3, 0.3);
@@ -102,14 +102,8 @@ function run()
     orbitControls.update();
 }
 function setBackgroundMusic(){
-    const listener = new THREE.AudioListener();
-    camera.add( listener );
-
-    // create a global audio source
-    const sound = new THREE.Audio( listener );
-
-    // load a sound and set it as the Audio object's buffer
-    const audioLoader = new THREE.AudioLoader();
+    //Cargar un sonido y configurarlo como el Audio Object's buffer
+    //Como es musica para background se reproduce en bucle
     audioLoader.load( '../sounds/background.mp3', function( buffer ) {
         sound.setBuffer( buffer );
         sound.setLoop( true );
@@ -178,6 +172,10 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+    listener = new THREE.AudioListener();
+    audioLoader = new THREE.AudioLoader();
+    camera.add( listener ); //Se añade el listener a la camara
+    sound = new THREE.Audio( listener );
     // Set background music
     setBackgroundMusic();
     // Create the objects
@@ -209,8 +207,6 @@ function createScene(canvas) {
         planes.position.set(-otroLado+lado*i,0,lado/2);
         planes.rotation.x = -Math.PI / 2;
         planes.position.y = -4.02;
-       // planes.castShadow = false;
-        //planes.receiveShadow = true;
         pistas.add(planes);
     }
     group.add( pistas );
