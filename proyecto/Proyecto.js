@@ -16,6 +16,9 @@ let spotLight = null;
 let ambientLight = null;
 let mapUrl = "../images/checker_large.gif";
 
+//pista
+let pistas = new THREE.Object3D;
+
 let anim1 = "../models/dancer/fbx/Hip Hop Dancing.fbx"
 let anim2 = "../models/dancer/fbx/Breakdance Uprock Var 2.fbx"
 let anim3 = "../models/dancer/fbx/Brooklyn Uprock.fbx"
@@ -168,25 +171,34 @@ function createScene(canvas) {
     group = new THREE.Object3D;
     root.add(group);
 
-    // Create a texture map
-    let map = new THREE.TextureLoader().load(mapUrl);
-    map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(8, 8);
 
-    let color = 0xffffff;
+    //crear las pistas
+    let lado = 40
+    let otroLado = lado+(lado/2)
+        // Create a texture map
+        let map = new THREE.TextureLoader().load(mapUrl);
+        map.wrapS = map.wrapT = THREE.RepeatWrapping;
+        map.repeat.set(8, 8);
+    for(i = 0; i<4; i++){
+        var geometry = new THREE.PlaneGeometry( lado, lado, 50, 50 );
+        var material = new THREE.MeshPhongMaterial( {color: 0xffffff,side: THREE.DoubleSide} );
+        var plane = new THREE.Mesh( geometry, material );
+        plane.position.set(-otroLado+lado*i,0,-lado/2);
+        plane.rotation.x = -Math.PI / 2;
+        plane.position.y = -4.02;
+        plane.castShadow = false;
+        plane.receiveShadow = true;
+        pistas.add(plane);
+        var planes = new THREE.Mesh( geometry, material );
+        planes.position.set(-otroLado+lado*i,0,lado/2);
+        planes.rotation.x = -Math.PI / 2;
+        planes.position.y = -4.02;
+       // planes.castShadow = false;
+        //planes.receiveShadow = true;
+        pistas.add(planes);
+    }
+    group.add( pistas );
 
-    // Put in a ground plane to show off the lighting
-    geometry = new THREE.PlaneGeometry(200, 200, 50, 50);
-    let mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:color, map:map, side:THREE.DoubleSide}));
-
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = -4.02;
-    
-    // Add the mesh to our group
-    group.add( mesh );
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-    
     // Now add the group to our scene
     scene.add( root );
 }
