@@ -16,6 +16,16 @@ let spotLight = null;
 let ambientLight = null;
 let mapUrl = "../images/checker_large.gif";
 
+let anim1 = "../models/dancer/fbx/Hip Hop Dancing.fbx"
+let anim2 = "../models/dancer/fbx/Breakdance Uprock Var 2.fbx"
+let anim3 = "../models/dancer/fbx/Brooklyn Uprock.fbx"
+let anim4 = "../models/dancer/fbx/Capoeira.fbx"
+let anim5 = "../models/dancer/fbx/Dancing Twerk.fbx"
+let anim6 = "../models/dancer/fbx/Flair.fbx"
+let anim7 = "../models/dancer/fbx/Samba Dancing.fbx"
+let anim8 = "../models/dancer/fbx/Silly Dancing.fbx"
+
+
 let SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
 
 async function loadFBX()
@@ -23,7 +33,7 @@ async function loadFBX()
     let loader = promisifyLoader(new THREE.FBXLoader());
 
     try{
-        let object = await loader.load( '../models/fbx/Samba Dancing.fbx');
+        let object = await loader.load( anim1);
         object.mixer = new THREE.AnimationMixer( scene );
         let action = object.mixer.clipAction( object.animations[ 0 ], object );
         object.scale.set(0.3, 0.3, 0.3);
