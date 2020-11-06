@@ -101,7 +101,22 @@ function run()
     // Update the camera controller
     orbitControls.update();
 }
+function setBackgroundMusic(){
+    const listener = new THREE.AudioListener();
+    camera.add( listener );
 
+    // create a global audio source
+    const sound = new THREE.Audio( listener );
+
+    // load a sound and set it as the Audio object's buffer
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load( '../sounds/background.mp3', function( buffer ) {
+        sound.setBuffer( buffer );
+        sound.setLoop( true );
+        sound.setVolume( 0.5 );
+        sound.play();
+    }); 
+}
 function createScene(canvas) {
     
     // Create the Three.js renderer and attach it to our canvas
@@ -163,7 +178,8 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
-    
+    // Set background music
+    setBackgroundMusic();
     // Create the objects
     loadFBX();
 
