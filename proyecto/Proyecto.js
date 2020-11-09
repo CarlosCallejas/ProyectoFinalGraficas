@@ -14,7 +14,7 @@ let box = null
 let duration = 20000; // ms
 let currentTime = Date.now();
 let dancers = [];
-
+let listener, audioLoader, sound =  null;
 let directionalLight = null;
 let spotLight = null;
 let ambientLight = null;
@@ -116,14 +116,8 @@ function run()
     orbitControls.update();
 }
 function setBackgroundMusic(){
-    const listener = new THREE.AudioListener();
-    camera.add( listener );
-
-    // create a global audio source
-    const sound = new THREE.Audio( listener );
-
-    // load a sound and set it as the Audio object's buffer
-    const audioLoader = new THREE.AudioLoader();
+    //Cargar un sonido como background y configurarlo como el Audio Object's buffer
+    //Como es musica para background se reproduce en bucle
     audioLoader.load( '../sounds/background.mp3', function( buffer ) {
         sound.setBuffer( buffer );
         sound.setLoop( true );
@@ -199,6 +193,15 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+    //Se incializa un listener para el audio
+    listener = new THREE.AudioListener(); 
+     //Se inicializa el loader para cargar los sonidos
+    audioLoader = new THREE.AudioLoader();
+    //Se inicializa una variable global llamada Sound que controla un sonido
+    sound = new THREE.Audio( listener ); 
+    //Se añade el listener a la camara
+    camera.add( listener ); 
+ 
     // Set background music
     setBackgroundMusic();
     // Create the objects
