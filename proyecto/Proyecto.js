@@ -106,7 +106,7 @@ function run()
     //creo que sera mejor con una UI
     //encontre esto https://github.com/poki/three-ui 
     //note to self: alch ya me estrese supongo que lo vere despues
-    box.position.set(camera.position.x,camera.position.y,camera.position.z-100)
+    //box.position.set(camera.position.x,camera.position.y,camera.position.z-100)
     console.log("camera: ")
     console.log(camera.position)
     console.log("box: ")
@@ -275,7 +275,9 @@ function createScene(canvas) {
     box = new THREE.Mesh( geometry, material );
     //box.position.set(-4.999999999999999,30,79.99999999999999)
     //box.position.set(camera.position.x +5,camera.position.y +5,camera.position.z +5)
-    scene.add(box)
+    camera.add(box)
+    box.position.set(0,0,30)
+    // scene.add(box)
     //crear el xilofono
 
     //fin de crear el xilofono
