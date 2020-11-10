@@ -4,10 +4,10 @@ camera = null,
 root = null,
 dancer = null,
 group = null,
+raycaster =null,
 orbitControls = null,
 mixer = null;
-
-
+let mouse = new THREE.Vector2(), INTERSECTED, CLICKED;
 let box = null
 
 
@@ -102,6 +102,7 @@ function run()
 
     // Spin the cube for next frame
     animate();
+    
     //intento de hacer que el rectangulo siga la camara
     //creo que sera mejor con una UI
     //encontre esto https://github.com/poki/three-ui 
@@ -114,6 +115,9 @@ function run()
 
     // Update the camera controller
     orbitControls.update();
+}
+function reproducirNota(){
+    console.log("Hola soy una nota");
 }
 function setBackgroundMusic(){
     //Cargar un sonido como background y configurarlo como el Audio Object's buffer
@@ -193,6 +197,8 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+    //Se inicializa el raycaster para detectar la colision de la baqueta y la tecla del xilofono
+    raycaster = new THREE.Raycaster();
     //Se incializa un listener para el audio
     listener = new THREE.AudioListener(); 
      //Se inicializa el loader para cargar los sonidos
@@ -203,9 +209,9 @@ function createScene(canvas) {
     camera.add( listener ); 
  
     // Set background music
-    setBackgroundMusic();
+     setBackgroundMusic();
     // Create the objects
-    loadFBX();
+     loadFBX();
 
     // Create a group to hold the objects
     group = new THREE.Object3D;
@@ -281,8 +287,60 @@ function createScene(canvas) {
     //fin de crear el xilofono
     ///aqui termina la creación de objetos    
     
+    //Inicia Events listeners
+   
+    document.addEventListener('mousemove', onDocumentMouseMove);
+    document.addEventListener('mousedown', onDocumentMouseDown);
+    //Termina Event listeners
+
     
     
     // Now add the group to our scene
     scene.add( root );
+}
+function onDocumentMouseMove( event ) 
+{
+    event.preventDefault();
+    console.log(event.clientX)
+    console.log(event.clientY)
+    console.log("....")
+  
+   //AQUI VA EL CODIGO PARA QUE LA BAQUETA SIGA AL MOUSE 
+    // box.position.x = ( event.clientX / 800 )*2 -1;
+    // box.position.y =  - ( event.clientY / 600 )*2 +1 + camera.position.y;
+    // box.position.z = 200;
+    // console.log(box.position)
+    // find intersections
+    
+}
+
+function onDocumentMouseDown(event)
+{
+    event.preventDefault();
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    // find intersections
+    raycaster.setFromCamera( mouse, camera );
+
+    let intersects = raycaster.intersectObjects( scene.children );
+
+    console.log("intersects", intersects);
+    if ( intersects.length > 0 ) 
+    {
+        CLICKED = intersects[ intersects.length - 1 ].object;
+        CLICKED.material.emissive.setHex( 0x00ff00 );
+        console.log(CLICKED);
+        if(!animator.running)
+        {
+           //aqui va lo de hacer la animacion para mover la baqueta y generar el sonido
+        }
+    } 
+    else 
+    {
+        if ( CLICKED ) 
+           //Resetear valores
+
+        CLICKED = null;
+    }
 }
