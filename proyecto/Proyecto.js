@@ -10,6 +10,8 @@ mixer = null;
 
 let box = null
 
+var grupoXilofono = new THREE.Object3D()
+
 
 let duration = 20000; // ms
 let currentTime = Date.now();
@@ -53,7 +55,7 @@ async function loadFBX()
                 child.receiveShadow = true;
             }
         } );
-        console.log(object.animations);
+        //console.log(object.animations);
         dancer = object;
         dancers.push(dancer);
         scene.add( object );
@@ -96,7 +98,7 @@ function animate()
 function run() 
 {
     requestAnimationFrame(function() { run(); });
-    
+   // console.log(camera.position)
     // Render the scene
     renderer.render( scene, camera );
 
@@ -107,11 +109,12 @@ function run()
     //encontre esto https://github.com/poki/three-ui 
     //note to self: alch ya me estrese supongo que lo vere despues
     //box.position.set(camera.position.x,camera.position.y,camera.position.z-100)
-    console.log("camera: ")
-    console.log(camera.position)
-    console.log("box: ")
-    console.log(box.position)
-
+    // console.log("camera: ")
+    // console.log(camera.position)
+    // console.log("box: ")
+    // console.log(box.position)
+    grupoXilofono.position.x=-camera.position.x
+    grupoXilofono.position.y=camera.position.y
     // Update the camera controller
     orbitControls.update();
 }
@@ -143,18 +146,17 @@ function createScene(canvas) {
 
     // Add  a camera so we can view the scene
     camera = new THREE.PerspectiveCamera( 45, canvas.width / canvas.height, 1, 4000 );
-    camera.position.set(-5, 30, 80);
+    camera.position.set(5, 90, 255);
     scene.add(camera);
-
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbitControls.target = new THREE.Vector3(0,20,0);
-    //aqui limitamos el zoom del orbit controller para que no salga del skybox
-    orbitControls.maxDistance = 400;
-    //con esto ponemos que rote automaticamente al rededor del bailarín
-        //estaria bueno que con cada click del mouse lo detuvieramos
-    orbitControls.autoRotate = false;
-    //con esto quitamos el pan para que la camara no salga del skybox (y por que siento que se ve mas guapo así)
-    orbitControls.enablePan = false;
+    //  orbitControls.target = new THREE.Vector3(0,20,20);
+    // //aqui limitamos el zoom del orbit controller para que no salga del skybox
+    // orbitControls.maxDistance = 400;
+    // //con esto ponemos que rote automaticamente al rededor del bailarín
+    //     //estaria bueno que con cada click del mouse lo detuvieramos
+    // orbitControls.autoRotate = false;
+    // //con esto quitamos el pan para que la camara no salga del skybox (y por que siento que se ve mas guapo así)
+    // orbitControls.enablePan = false;
         
     // Create a group to hold all the objects
     root = new THREE.Object3D;
@@ -270,14 +272,26 @@ function createScene(canvas) {
         }
         group.add( pistas );
     //fin de crear pistas
-    var geometry = new THREE.BoxGeometry( 10,10,10 );
+    var geometry = new THREE.BoxGeometry( 4,5,10 );
     var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
     box = new THREE.Mesh( geometry, material );
-    //box.position.set(-4.999999999999999,30,79.99999999999999)
-    //box.position.set(camera.position.x +5,camera.position.y +5,camera.position.z +5)
     camera.add(box)
-    box.position.set(0,0,30)
-    // scene.add(box)
+    //grupoXilofono.position.set(0,0,0)
+    // //box.position.set(-4.999999999999999,30,79.99999999999999)
+    // //box.position.set(camera.position.x +5,camera.position.y +5,camera.position.z +5)
+    // //camera.add(grupoXilofono)
+    camera.add(grupoXilofono)
+    // box.position.set(-18,20,50)
+    // box.position.set(0,0,0)
+    // //grupoXilofono.add(box)
+    // camera.add(box)
+    // console.log("grupoXilofono")
+    // console.log(grupoXilofono.position)
+    // console.log("camera")
+    // console.log(camera.position)
+    //  //scene.add(box)
+    //  console.log("caja")
+    //  console.log(box.position)
     //crear el xilofono
 
     //fin de crear el xilofono
