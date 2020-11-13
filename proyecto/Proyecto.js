@@ -20,10 +20,16 @@ let spotLight = null;
 let ambientLight = null;
 let mapUrl = "../images/checker_large.gif";
 
+let spotLights = [];
+let spotlightHelper=null
+let spotlightHelper2=null
+let spotlightHelper3=null
+
 //pista
 //objeto THREE vacio con el cual vamos a añadir todas las pistas a la escena
 let pistas = new THREE.Object3D;
 
+//Son todos los archivos que contienen las animaciones del personaje del proyecto, sus diferentes bailes
 let anim1 = "../models/dancer/fbx/Hip Hop Dancing.fbx"
 let anim2 = "../models/dancer/fbx/Breakdance Uprock Var 2.fbx"
 let anim3 = "../models/dancer/fbx/Brooklyn Uprock.fbx"
@@ -36,6 +42,8 @@ let anim8 = "../models/dancer/fbx/Silly Dancing.fbx"
 
 let SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
 
+//Función encargada de cargar los archivos de las animaciones en el proyecto, para que pueda visualizarse
+//al personaje con su animación especificada
 async function loadFBX()
 {
     let loader = promisifyLoader(new THREE.FBXLoader());
@@ -44,7 +52,7 @@ async function loadFBX()
         let object = await loader.load( anim4);
         object.mixer = new THREE.AnimationMixer( scene );
         let action = object.mixer.clipAction( object.animations[ 0 ], object );
-        object.scale.set(0.3, 0.3, 0.3);
+        object.scale.set(0.2, 0.2, 0.2);
         object.position.y -= 4;
         action.play();
         object.traverse( function ( child ) {
@@ -165,26 +173,26 @@ function createScene(canvas) {
     // Create a group to hold all the objects
     root = new THREE.Object3D;
     
-    let spotLights = [];
+    //Luces del ambiente, que cambiarán a través del tiempo
 
-    spotLight = new THREE.SpotLight (0x00fa00);
-    spotLight.position.set(40, 70, -10);
-    spotLight.target.position.set(-2, 0, -2);
-    spotLights.push(spotLight);
-    root.add(spotLight);
+    spotLight1 = new THREE.SpotLight (0x00fa00);
+    spotLight1.position.set(40, 70, -10);
+    spotLight1.target.position.set(-2, 0, -2);
+    spotLights.push(spotLight1);
+    root.add(spotLight1);
 
-    spotLight = new THREE.SpotLight (0x5500ff);
-    spotLight.position.set(0, 70, -40);
-    spotLight.target.position.set(-2, 0, -2);
-    spotLights.push(spotLight);
-    root.add(spotLight);
+    spotLight2 = new THREE.SpotLight (0x5500ff);
+    spotLight2.position.set(0, 70, -40);
+    spotLight2.target.position.set(-2, 0, -2);
+    spotLights.push(spotLight2);
+    root.add(spotLight2);
 
-    spotLight = new THREE.SpotLight (0xfaf600);
-    spotLight.position.set(0, 70, 40);
-    spotLight.target.position.set(-2, 0, -2);
-    spotLights.push(spotLight);
-    root.add(spotLight);
-
+    spotLight3 = new THREE.SpotLight (0xfaf600);
+    spotLight3.position.set(0, 70, 40);
+    spotLight3.target.position.set(-2, 0, -2);
+    spotLights.push(spotLight3);
+    root.add(spotLight3);
+    
     for(let sp of spotLights)
     {
         sp.castShadow = true;
@@ -199,6 +207,8 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+
+
     // Set background music
     setBackgroundMusic();
     // Create the objects
@@ -278,8 +288,35 @@ function createScene(canvas) {
     //fin de crear el xilofono
     ///aqui termina la creación de objetos    
     
-    
+    //Llamo la función del cambio de luces para que se repita cada 5000 milisegundos
+    setInterval(luces, 5000)
     
     // Now add the group to our scene
     scene.add( root );
+}
+
+//Esta funcion tiene como objetivo cambiar las luces spotlight del programa, haciendo parecer que es una discoteca 
+function luces( ){
+    var color=Math.random();
+    var colorHex
+    var colorHex2
+    var colorHex3
+
+    if(color<=0.4){
+        colorHex="#242DD8"
+        colorHex2="#FFE307"
+        colorHex3="#FF9507"
+    }else if(color<=0.7 && color>0.4){
+        colorHex="#45EC07"
+        colorHex2="#FF6107"
+        colorHex3="#E10699"
+    }else if(color<1 && color>0.7){
+        colorHex="#FF6B07"
+        colorHex2="#1866D3"
+        colorHex3="#25E907"
+    }
+    spotLights[0].color.set(colorHex)
+    spotLights[1].color.set(colorHex2)
+    spotLights[2].color.set(colorHex3)
+    console.log("hola")
 }
