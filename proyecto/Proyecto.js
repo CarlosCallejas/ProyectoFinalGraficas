@@ -329,7 +329,7 @@ function onDocumentMouseDown(event)
     if ( intersects.length > 0 ) 
     {
         CLICKED = intersects[ intersects.length - 1 ].object;
-        CLICKED.material.emissive.setHex( 0x00ff00 );
+        //CLICKED.material.emissive.setHex( 0x00ff00 );
         console.log(CLICKED);
         if(!animator.running)
         {
