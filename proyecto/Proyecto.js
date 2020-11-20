@@ -14,7 +14,9 @@ let box = null
 let duration = 20000; // ms
 let currentTime = Date.now();
 let dancers = [];
-let listener, audioLoader, sound =  null;
+let objSonidos = [];
+let notasPath = [];
+let listener, audioLoader, soundBackground =  null;
 let directionalLight = null;
 let spotLight = null;
 let ambientLight = null;
@@ -78,9 +80,35 @@ function onKeyDown(event)
             scene.add(newDancer);
             console.log(dancers);
             break;
+        case 83:
+            objSonidos[0].play();
+            break;
+        case 68: 
+            objSonidos[1].play();
+            break;
+        case 70: 
+            objSonidos[2].play();
+            break;
+        case 71: 
+            objSonidos[3].play();
+            break;
+        case 72: 
+            objSonidos[4].play();
+            break;
+        case 74: 
+            objSonidos[5].play();
+            break;
+        case 75: 
+            objSonidos[6].play();
+            break;
+        case 76: 
+            objSonidos[7].play();
+            break;
     }
 }
-
+function notasPathLoader(nota_path, index){
+    cargarPista(objSonidos[index], nota_path);
+}
 function animate() 
 {
     let now = Date.now();
@@ -108,10 +136,10 @@ function run()
     //encontre esto https://github.com/poki/three-ui 
     //note to self: alch ya me estrese supongo que lo vere despues
     box.position.set(camera.position.x,camera.position.y,camera.position.z-100)
-    console.log("camera: ")
-    console.log(camera.position)
-    console.log("box: ")
-    console.log(box.position)
+    // console.log("camera: ")
+    // console.log(camera.position)
+    // console.log("box: ")
+    // console.log(box.position)
 
     // Update the camera controller
     orbitControls.update();
@@ -119,14 +147,16 @@ function run()
 function reproducirNota(){
     console.log("Hola soy una nota");
 }
-function setBackgroundMusic(){
+function cargarPista(objSonido, path, setLoop = false, volumen = 0.8){
     //Cargar un sonido como background y configurarlo como el Audio Object's buffer
     //Como es musica para background se reproduce en bucle
-    audioLoader.load( '../sounds/background.mp3', function( buffer ) {
-        sound.setBuffer( buffer );
-        sound.setLoop( true );
-        sound.setVolume( 0.5 );
-        sound.play();
+    console.log(objSonido);
+    console.log(path);
+
+    audioLoader.load( path, function( buffer ) {
+        objSonido.setBuffer( buffer );
+        objSonido.setLoop( setLoop );
+        objSonido.setVolume( volumen );
     }); 
 }
 function createScene(canvas) {
@@ -164,6 +194,7 @@ function createScene(canvas) {
     root = new THREE.Object3D;
     
     let spotLights = [];
+
 
     spotLight = new THREE.SpotLight (0x00fa00);
     spotLight.position.set(40, 70, -10);
@@ -203,15 +234,29 @@ function createScene(canvas) {
     listener = new THREE.AudioListener(); 
      //Se inicializa el loader para cargar los sonidos
     audioLoader = new THREE.AudioLoader();
-    //Se inicializa una variable global llamada Sound que controla un sonido
-    sound = new THREE.Audio( listener ); 
+    //Se inicializa una variable global llamada Sound que controla un sonido del background
+    soundBackground = new THREE.Audio( listener ); 
+    //Se inicializan todos los objetos Audio de las 8 notas 
+    objSonidos = [
+        new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), 
+        new THREE.Audio( listener ), new THREE.Audio( listener )
+    ];
+    //cargar pista del backgroud
+    cargarPista(soundBackground, "../sounds/background.mp3", true, 0.1);
+    soundBackground.play();
     //Se añade el listener a la camara
     camera.add( listener ); 
  
-    // Set background music
-     setBackgroundMusic();
     // Create the objects
      loadFBX();
+
+    // Cargar notas musicales 
+    notasPath = [
+        "../sounds/notas/nota1.mp3", "../sounds/notas/nota2.mp3", "../sounds/notas/nota3.mp3", "../sounds/notas/nota4.mp3", 
+        "../sounds/notas/nota5.mp3", "../sounds/notas/nota6.mp3", "../sounds/notas/nota7.mp3", "../sounds/notas/nota8.mp3"  
+    ];
+    //Cargar las 8 notas musicales
+    notasPath.forEach(notasPathLoader);
 
     // Create a group to hold the objects
     group = new THREE.Object3D;
@@ -301,9 +346,9 @@ function createScene(canvas) {
 function onDocumentMouseMove( event ) 
 {
     event.preventDefault();
-    console.log(event.clientX)
-    console.log(event.clientY)
-    console.log("....")
+    // console.log(event.clientX)
+    // console.log(event.clientY)
+    // console.log("....")
   
    //AQUI VA EL CODIGO PARA QUE LA BAQUETA SIGA AL MOUSE 
     // box.position.x = ( event.clientX / 800 )*2 -1;
