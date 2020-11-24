@@ -183,6 +183,8 @@ function cargarPista(objSonido, path, setLoop = false, volumen = 0.8){
         objSonido.setBuffer( buffer );
         objSonido.setLoop( setLoop );
         objSonido.setVolume( volumen );
+    }); 
+}
 function setBackgroundMusic(){
     const listener = new THREE.AudioListener();
     camera.add( listener );
@@ -442,6 +444,7 @@ function onDocumentMouseMove( event )
     // find intersections
     
 }
+
 
 function onDocumentMouseDown(event)
 {
