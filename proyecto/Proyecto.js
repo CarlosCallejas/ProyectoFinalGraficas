@@ -81,27 +81,51 @@ function onKeyDown(event)
             console.log(dancers);
             break;
         case 83:
+            if(objSonidos[0].isPlaying){
+                objSonidos[0].stop();
+            }
             objSonidos[0].play();
             break;
         case 68: 
+            if(objSonidos[1].isPlaying){
+                objSonidos[1].stop();
+            }
             objSonidos[1].play();
             break;
         case 70: 
+            if(objSonidos[2].isPlaying){
+                objSonidos[2].stop();
+            }
             objSonidos[2].play();
             break;
         case 71: 
+            if(objSonidos[3].isPlaying){
+                objSonidos[3].stop();
+            }
             objSonidos[3].play();
             break;
         case 72: 
+            if(objSonidos[4].isPlaying){
+                objSonidos[4].stop();
+            }
             objSonidos[4].play();
             break;
         case 74: 
+            if(objSonidos[5].isPlaying){
+                objSonidos[5].stop();
+            }
             objSonidos[5].play();
             break;
         case 75: 
+            if(objSonidos[6].isPlaying){
+                objSonidos[6].stop();
+            }
             objSonidos[6].play();
             break;
         case 76: 
+            if(objSonidos[7].isPlaying){
+                objSonidos[7].stop();
+            }
             objSonidos[7].play();
             break;
     }
