@@ -4,16 +4,20 @@ camera = null,
 root = null,
 dancer = null,
 group = null,
+raycaster =null,
 orbitControls = null,
 mixer = null;
-
-
+let mouse = new THREE.Vector2(), INTERSECTED, CLICKED;
 let box = null
 
 
 let duration = 20000; // ms
 let currentTime = Date.now();
 let dancers = [];
+
+let objSonidos = [];
+let notasPath = [];
+let listener, audioLoader, soundBackground =  null;
 
 let directionalLight = null;
 let spotLight = null;
@@ -82,9 +86,59 @@ function onKeyDown(event)
             scene.add(newDancer);
             console.log(dancers);
             break;
+        case 83:
+            if(objSonidos[0].isPlaying){
+                objSonidos[0].stop();
+            }
+            objSonidos[0].play();
+            break;
+        case 68: 
+            if(objSonidos[1].isPlaying){
+                objSonidos[1].stop();
+            }
+            objSonidos[1].play();
+            break;
+        case 70: 
+            if(objSonidos[2].isPlaying){
+                objSonidos[2].stop();
+            }
+            objSonidos[2].play();
+            break;
+        case 71: 
+            if(objSonidos[3].isPlaying){
+                objSonidos[3].stop();
+            }
+            objSonidos[3].play();
+            break;
+        case 72: 
+            if(objSonidos[4].isPlaying){
+                objSonidos[4].stop();
+            }
+            objSonidos[4].play();
+            break;
+        case 74: 
+            if(objSonidos[5].isPlaying){
+                objSonidos[5].stop();
+            }
+            objSonidos[5].play();
+            break;
+        case 75: 
+            if(objSonidos[6].isPlaying){
+                objSonidos[6].stop();
+            }
+            objSonidos[6].play();
+            break;
+        case 76: 
+            if(objSonidos[7].isPlaying){
+                objSonidos[7].stop();
+            }
+            objSonidos[7].play();
+            break;
     }
 }
-
+function notasPathLoader(nota_path, index){
+    cargarPista(objSonidos[index], nota_path);
+}
 function animate() 
 {
     let now = Date.now();
@@ -106,10 +160,22 @@ function run()
 
     // Animar al bailarin en el centro de la escena
     animate();
-
     // Update the camera controller
     orbitControls.update();
 }
+function reproducirNota(){
+    console.log("Hola soy una nota");
+}
+function cargarPista(objSonido, path, setLoop = false, volumen = 0.8){
+    //Cargar un sonido como background y configurarlo como el Audio Object's buffer
+    //Como es musica para background se reproduce en bucle
+    console.log(objSonido);
+    console.log(path);
+
+    audioLoader.load( path, function( buffer ) {
+        objSonido.setBuffer( buffer );
+        objSonido.setLoop( setLoop );
+        objSonido.setVolume( volumen );
 function setBackgroundMusic(){
     const listener = new THREE.AudioListener();
     camera.add( listener );
@@ -162,6 +228,7 @@ function createScene(canvas) {
     
     let spotLights = [];
 
+
     spotLight = new THREE.SpotLight (0x00fa00);
     spotLight.position.set(40, 70, -10);
     spotLight.target.position.set(-2, 0, -2);
@@ -194,10 +261,36 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+    //Se inicializa el raycaster para detectar la colision de la baqueta y la tecla del xilofono
+    raycaster = new THREE.Raycaster();
+    //Se incializa un listener para el audio
+    listener = new THREE.AudioListener(); 
+     //Se inicializa el loader para cargar los sonidos
+    audioLoader = new THREE.AudioLoader();
+    //Se inicializa una variable global llamada Sound que controla un sonido del background
+    soundBackground = new THREE.Audio( listener ); 
+    //Se inicializan todos los objetos Audio de las 8 notas 
+    objSonidos = [
+        new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), 
+        new THREE.Audio( listener ), new THREE.Audio( listener )
+    ];
+    //cargar pista del backgroud
+    cargarPista(soundBackground, "../sounds/background.mp3", true, 0.1);
+    soundBackground.play();
+    //Se añade el listener a la camara
+    camera.add( listener ); 
     // Set background music
     setBackgroundMusic();
     // Create the objects
-    loadFBX();
+     loadFBX();
+
+    // Cargar notas musicales 
+    notasPath = [
+        "../sounds/notas/nota1.mp3", "../sounds/notas/nota2.mp3", "../sounds/notas/nota3.mp3", "../sounds/notas/nota4.mp3", 
+        "../sounds/notas/nota5.mp3", "../sounds/notas/nota6.mp3", "../sounds/notas/nota7.mp3", "../sounds/notas/nota8.mp3"  
+    ];
+    //Cargar las 8 notas musicales
+    notasPath.forEach(notasPathLoader);
 
     // Create a group to hold the objects
     group = new THREE.Object3D;
@@ -285,9 +378,60 @@ function createScene(canvas) {
     xilofonoG.children[6].rotation.set(0,-0.25,0)
     xilofonoG.children[7].rotation.set(0,-0.335,0)
     camera.add(xilofonoG)
-    //fin de crear el xilofono
-    ///aqui termina la creaciÃ³n de objetos    
+    //fin de crear el xilofono   
     
+    //Inicia Events listeners   
+    document.addEventListener('mousemove', onDocumentMouseMove);
+    document.addEventListener('mousedown', onDocumentMouseDown);
+    //Termina Event listeners
+
+    ///aqui termina la creación de objetos    
     // Now add the group to our scene
     scene.add( root );
+}
+function onDocumentMouseMove( event ) 
+{
+    event.preventDefault();
+    // console.log(event.clientX)
+    // console.log(event.clientY)
+    // console.log("....")
+  
+   //AQUI VA EL CODIGO PARA QUE LA BAQUETA SIGA AL MOUSE 
+    // box.position.x = ( event.clientX / 800 )*2 -1;
+    // box.position.y =  - ( event.clientY / 600 )*2 +1 + camera.position.y;
+    // box.position.z = 200;
+    // console.log(box.position)
+    // find intersections
+    
+}
+
+function onDocumentMouseDown(event)
+{
+    event.preventDefault();
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+    // find intersections
+    raycaster.setFromCamera( mouse, camera );
+
+    let intersects = raycaster.intersectObjects( scene.children );
+
+    console.log("intersects", intersects);
+    if ( intersects.length > 0 ) 
+    {
+        CLICKED = intersects[ intersects.length - 1 ].object;
+        //CLICKED.material.emissive.setHex( 0x00ff00 );
+        console.log(CLICKED);
+        if(!animator.running)
+        {
+           //aqui va lo de hacer la animacion para mover la baqueta y generar el sonido
+        }
+    } 
+    else 
+    {
+        if ( CLICKED ) 
+           //Resetear valores
+
+        CLICKED = null;
+    }
 }
