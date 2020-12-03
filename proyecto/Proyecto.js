@@ -334,7 +334,7 @@ function createScene(canvas) {
         var cubeMaterial = new THREE.MeshFaceMaterial(skymateriales);
         var cube = new THREE.Mesh(skyGeometry,cubeMaterial)
         
-       // scene.add(cube)
+        scene.add(cube)
     //fin de crear el skybox
 
 
@@ -446,48 +446,11 @@ function luces( ){
 function onDocumentMouseMove( event ) 
 {
     event.preventDefault();
-    // console.log(event.clientX)
-    // console.log(event.clientY)
-    // console.log("....")
-  
-   //AQUI VA EL CODIGO PARA QUE LA BAQUETA SIGA AL MOUSE 
-    // box.position.x = ( event.clientX / 800 )*2 -1;
-    // box.position.y =  - ( event.clientY / 600 )*2 +1 + camera.position.y;
-    // box.position.z = 200;
-    // console.log(box.position)
-    // find intersections
+
     
 }
 
 
-// function onDocumentMouseDown(event)
-// {
-//     event.preventDefault();
-//     mouse.x = ( event.clientX / 800 ) * 2 - 1;
-//     mouse.y = - ( event.clientY / 600 ) * 2 + 1;
-//     // find intersections
-//     raycaster.setFromCamera( mouse, camera );
-
-//     let intersects = raycaster.intersectObjects( scene.children );
-
-//     console.log("intersects", intersects);
-//     if ( intersects.length > 0 ) 
-//     {
-//         CLICKED = intersects[ 0].object;
-//         //CLICKED.material.emissive.setHex( 0x00ff00 );
-//         console.log(CLICKED);
-        
-//            //aqui va lo de hacer la animacion para mover la baqueta y generar el sonido
-        
-//     } 
-//     else 
-//     {
-//         if ( CLICKED ) 
-//            //Resetear valores
-
-//         CLICKED = null;
-//     }
-// }
 function onDocumentMouseClick( event ) {
 
     event.preventDefault();
@@ -501,7 +464,67 @@ function onDocumentMouseClick( event ) {
     if ( intersects.length > 0 ) {
 
         const object = intersects[ intersects.length -1 ].object;
-        console.log(object)
+        switch (object.name) {
+            case "tecla1":
+                if(objSonidos[0].isPlaying){
+                    objSonidos[0].stop();
+                }
+                objSonidos[0].play();
+                timer = 80;
+                break;
+            case "tecla2":
+                if(objSonidos[1].isPlaying){
+                    objSonidos[1].stop();
+                }
+                objSonidos[1].play();
+                timer = 80;
+                break;
+            case "tecla3":
+                if(objSonidos[2].isPlaying){
+                    objSonidos[2].stop();
+                }
+                objSonidos[2].play();
+                timer = 80;
+                break;
+            case "tecla4":
+                if(objSonidos[3].isPlaying){
+                    objSonidos[3].stop();
+                }
+                objSonidos[3].play();
+                timer = 80;
+                break;
+            case "tecla5":
+                if(objSonidos[4].isPlaying){
+                    objSonidos[4].stop();
+                }
+                objSonidos[4].play();
+                timer = 80;
+                break;
+            case "tecla6":
+                if(objSonidos[5].isPlaying){
+                    objSonidos[5].stop();
+                }
+                objSonidos[5].play();
+                timer = 80;
+                break;
+            case "tecla7":
+                if(objSonidos[6].isPlaying){
+                    objSonidos[6].stop();
+                }
+                objSonidos[6].play();
+                timer = 80;
+                break;
+            case "tecla8":
+                if(objSonidos[7].isPlaying){
+                    objSonidos[7].stop();
+                }
+                objSonidos[7].play();
+                timer = 80;
+                break;
+            default:
+                break;
+        }
+        
 
     }
 
