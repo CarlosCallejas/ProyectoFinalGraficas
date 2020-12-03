@@ -17,13 +17,13 @@ let dancers = [];
 
 let objSonidos = [];
 let notasPath = [];
-let listener, audioLoader, soundBackground =  null;
+let listener, audioLoader;
 
 let directionalLight = null;
 let spotLight = null;
 let ambientLight = null;
 let mapUrl = "../images/checker_large.gif";
-
+let timer = 0;
 let spotLights = [];
 let spotlightHelper=null
 let spotlightHelper2=null
@@ -98,48 +98,56 @@ function onKeyDown(event)
                 objSonidos[0].stop();
             }
             objSonidos[0].play();
+            timer = 80;
             break;
         case 68: 
             if(objSonidos[1].isPlaying){
                 objSonidos[1].stop();
             }
             objSonidos[1].play();
+            timer = 80;
             break;
         case 70: 
             if(objSonidos[2].isPlaying){
                 objSonidos[2].stop();
             }
             objSonidos[2].play();
+            timer = 80;
             break;
         case 71: 
             if(objSonidos[3].isPlaying){
                 objSonidos[3].stop();
             }
             objSonidos[3].play();
+            timer = 80;
             break;
         case 72: 
             if(objSonidos[4].isPlaying){
                 objSonidos[4].stop();
             }
             objSonidos[4].play();
+            timer = 80;
             break;
         case 74: 
             if(objSonidos[5].isPlaying){
                 objSonidos[5].stop();
             }
             objSonidos[5].play();
+            timer = 80;
             break;
         case 75: 
             if(objSonidos[6].isPlaying){
                 objSonidos[6].stop();
             }
             objSonidos[6].play();
+            timer = 80;
             break;
         case 76: 
             if(objSonidos[7].isPlaying){
                 objSonidos[7].stop();
             }
             objSonidos[7].play();
+            timer = 80;
             break;
     }
 }
@@ -151,11 +159,20 @@ function animate()
     let now = Date.now();
     let deltat = now - currentTime;
     currentTime = now;
-    if ( dancers.length > 0) 
-    {
-        for(dancer_i of dancers)
-            dancer_i.mixer.update( ( deltat ) * 0.001 );
+    timer--;
+    if(timer > 0){
+        if ( dancers.length > 0) 
+        {
+            for(var dancer_i of dancers)
+                dancer_i.mixer.update( ( deltat ) * 0.001 );
+        }
     }
+    
+    // if ( dancers.length > 0) 
+    // {
+    //     for(dancer_i of dancers)
+    //         dancer_i.mixer.update( ( deltat ) * 0.001 );
+    // }
 }
 
 function run() 
@@ -173,22 +190,16 @@ function run()
 function reproducirNota(){
     console.log("Hola soy una nota");
 }
-function cargarPista(objSonido, path, setLoop = false, volumen = 0.8){
+function cargarPista(objSonido, path,  volumen = 0.8){
     //Cargar un sonido como background y configurarlo como el Audio Object's buffer
     //Como es musica para background se reproduce en bucle
-    console.log(objSonido);
-    console.log(path);
-
     audioLoader.load( path, function( buffer ) {
         objSonido.setBuffer( buffer );
-        objSonido.setLoop( setLoop );
+        objSonido.setLoop( false );
         objSonido.setVolume( volumen );
     }); 
 }
 function setBackgroundMusic(){
-    const listener = new THREE.AudioListener();
-    camera.add( listener );
-
     // create a global audio source
     const sound = new THREE.Audio( listener );
 
@@ -276,20 +287,15 @@ function createScene(canvas) {
     listener = new THREE.AudioListener(); 
      //Se inicializa el loader para cargar los sonidos
     audioLoader = new THREE.AudioLoader();
-    //Se inicializa una variable global llamada Sound que controla un sonido del background
-    soundBackground = new THREE.Audio( listener ); 
     //Se inicializan todos los objetos Audio de las 8 notas 
     objSonidos = [
         new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), 
         new THREE.Audio( listener ), new THREE.Audio( listener )
     ];
-    //cargar pista del backgroud
-    cargarPista(soundBackground, "../sounds/background.mp3", true, 0.1);
-    soundBackground.play();
     //Se añade el listener a la camara
     camera.add( listener ); 
     // Set background music
-    setBackgroundMusic();
+    //setBackgroundMusic();
     // Create the objects
      loadFBX();
 
@@ -328,7 +334,7 @@ function createScene(canvas) {
         var cubeMaterial = new THREE.MeshFaceMaterial(skymateriales);
         var cube = new THREE.Mesh(skyGeometry,cubeMaterial)
         
-        scene.add(cube)
+       // scene.add(cube)
     //fin de crear el skybox
 
 
@@ -379,19 +385,27 @@ function createScene(canvas) {
         xilofonoG.add(box)   
     }
     xilofonoG.children[0].rotation.set(0,0.4,0)
+    xilofonoG.children[0].name = ("tecla1");
     xilofonoG.children[1].rotation.set(0,0.335,0)
+    xilofonoG.children[1].name = ("tecla2");
     xilofonoG.children[2].rotation.set(0,0.25,0)    
+    xilofonoG.children[2].name = ("tecla3");
     xilofonoG.children[3].rotation.set(0,0.110,0) 
+    xilofonoG.children[3].name = ("tecla4");
     xilofonoG.children[4].rotation.set(0,0,0) 
+    xilofonoG.children[4].name = ("tecla5");
     xilofonoG.children[5].rotation.set(0,-0.110,0)
+    xilofonoG.children[5].name = ("tecla6");
     xilofonoG.children[6].rotation.set(0,-0.25,0)
+    xilofonoG.children[6].name = ("tecla7");
     xilofonoG.children[7].rotation.set(0,-0.335,0)
+    xilofonoG.children[7].name = ("tecla8");
     camera.add(xilofonoG)
     //fin de crear el xilofono   
     
     //Inicia Events listeners   
     document.addEventListener('mousemove', onDocumentMouseMove);
-    document.addEventListener('mousedown', onDocumentMouseDown);
+    document.addEventListener('click', onDocumentMouseClick);
     //Termina Event listeners
 
     ///aqui termina la creación de objetos    
@@ -446,33 +460,49 @@ function onDocumentMouseMove( event )
 }
 
 
-function onDocumentMouseDown(event)
-{
+// function onDocumentMouseDown(event)
+// {
+//     event.preventDefault();
+//     mouse.x = ( event.clientX / 800 ) * 2 - 1;
+//     mouse.y = - ( event.clientY / 600 ) * 2 + 1;
+//     // find intersections
+//     raycaster.setFromCamera( mouse, camera );
+
+//     let intersects = raycaster.intersectObjects( scene.children );
+
+//     console.log("intersects", intersects);
+//     if ( intersects.length > 0 ) 
+//     {
+//         CLICKED = intersects[ 0].object;
+//         //CLICKED.material.emissive.setHex( 0x00ff00 );
+//         console.log(CLICKED);
+        
+//            //aqui va lo de hacer la animacion para mover la baqueta y generar el sonido
+        
+//     } 
+//     else 
+//     {
+//         if ( CLICKED ) 
+//            //Resetear valores
+
+//         CLICKED = null;
+//     }
+// }
+function onDocumentMouseClick( event ) {
+
     event.preventDefault();
+    console.log("entre");
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-    // find intersections
+ //   console.log(mouse);console.log(camera);
     raycaster.setFromCamera( mouse, camera );
+    const intersects = raycaster.intersectObjects( xilofonoG.children );
+    console.log(intersects);
+    if ( intersects.length > 0 ) {
 
-    let intersects = raycaster.intersectObjects( scene.children );
+        const object = intersects[ intersects.length -1 ].object;
+        console.log(object)
 
-    console.log("intersects", intersects);
-    if ( intersects.length > 0 ) 
-    {
-        CLICKED = intersects[ intersects.length - 1 ].object;
-        //CLICKED.material.emissive.setHex( 0x00ff00 );
-        console.log(CLICKED);
-        if(!animator.running)
-        {
-           //aqui va lo de hacer la animacion para mover la baqueta y generar el sonido
-        }
-    } 
-    else 
-    {
-        if ( CLICKED ) 
-           //Resetear valores
-
-        CLICKED = null;
     }
+
 }

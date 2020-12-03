@@ -38,8 +38,9 @@
 			function() {
 
 				let canvas = document.getElementById("webglcanvas");
-				
-				// document.addEventListener("keydown", onKeyDown, false);
+                canvas.width = window.innerWidth -5;
+                canvas.height = window.innerHeight -5;
+				document.addEventListener("keydown", onKeyDown, false);
 
 				// create the scene
 				createScene(canvas);
