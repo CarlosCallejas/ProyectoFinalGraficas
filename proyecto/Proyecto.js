@@ -24,6 +24,9 @@ let spotLight = null;
 let ambientLight = null;
 let mapUrl = "../images/checker_large.gif";
 let timer = 0;
+// let tiempos = 0;
+var bailador = 1
+var bailadorOld = 1
 let spotLights = [];
 let spotlightHelper=null
 let spotlightHelper2=null
@@ -35,19 +38,26 @@ let pistas = new THREE.Object3D;
 
 //xilofono
 let xilofonoG = new THREE.Object3D;
+let grupoLoading = new THREE.Object3D;
 
 //Son todos los archivos que contienen las animaciones del personaje del proyecto, sus diferentes bailes
-let anim1 = "../models/dancer/fbx/Hip Hop Dancing.fbx"
-let anim2 = "../models/dancer/fbx/Breakdance Uprock Var 2.fbx"
-let anim3 = "../models/dancer/fbx/Brooklyn Uprock.fbx"
-let anim4 = "../models/dancer/fbx/Capoeira.fbx"
-let anim5 = "../models/dancer/fbx/Dancing Twerk.fbx"
-let anim6 = "../models/dancer/fbx/Flair.fbx"
-let anim7 = "../models/dancer/fbx/Samba Dancing.fbx"
-let anim8 = "../models/dancer/fbx/Silly Dancing.fbx"
-
+let animatios = ["../models/dancer/fbx/idle.fbx", 
+                "../models/dancer/fbx/Hip Hop Dancing.fbx",
+                "../models/dancer/fbx/Breakdance Uprock Var 2.fbx",
+                "../models/dancer/fbx/Brooklyn Uprock.fbx",
+                "../models/dancer/fbx/Capoeira.fbx",
+                "../models/dancer/fbx/Dancing Twerk.fbx",
+                "../models/dancer/fbx/Flair.fbx",
+                "../models/dancer/fbx/Samba Dancing.fbx",
+                "../models/dancer/fbx/Silly Dancing.fbx"
+]
+var LOADED_ANIMATIONS = 0
+var ANIMATIONS_LOADED = false
 
 let SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
+
+let composer = null, bloomPass = null, gui = null;
+
 
 //Función encargada de cargar los archivos de las animaciones en el proyecto, para que pueda visualizarse
 //al personaje con su animación especificada
@@ -55,100 +65,134 @@ async function loadFBX()
 {
     let loader = promisifyLoader(new THREE.FBXLoader());
 
-    try{
-        let object = await loader.load( anim4);
-        object.mixer = new THREE.AnimationMixer( scene );
-        let action = object.mixer.clipAction( object.animations[ 0 ], object );
-        object.scale.set(0.2, 0.2, 0.2);
-        object.position.y -= 4;
-        action.play();
-        object.traverse( function ( child ) {
-            if ( child.isMesh ) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        } );
-        console.log(object.animations);
-        dancer = object;
-        dancers.push(dancer);
-        scene.add( object );
+    for(var i=0; i<9; i++){
+        console.log(i)
+        try{
+            let object = await loader.load( animatios[i]);
+            object.mixer = new THREE.AnimationMixer( scene );
+            let action = object.mixer.clipAction( object.animations[0], object );
+            object.scale.set(0.2, 0.2, 0.2);
+            object.position.y -= 4;
+            action.play();
+            object.traverse( function ( child ) {
+                if ( child.isMesh ) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            } );
+           // console.log(object.animations);
+            dancer = object;
+            dancers.push(dancer);
+            scene.add( object );
+            LOADED_ANIMATIONS++;
+            console.log("progressbar: "+LOADED_ANIMATIONS/9*100+"%")
+            grupoLoading.children[2].scale.x += 52
+        }
+        catch(err)
+        {
+            console.error( err );
+        }
     }
-    catch(err)
-    {
-        console.error( err );
-    }
+    ANIMATIONS_LOADED = true
 }
 
 function onKeyDown(event)
 {
-    switch(event.keyCode)
-    {
-        case 65:
-            console.log("Cloning dancer");
-            let newDancer = cloneFbx(dancer);
-            newDancer.mixer =  new THREE.AnimationMixer( scene );
-            let action = newDancer.mixer.clipAction( newDancer.animations[ 0 ], newDancer );
-            action.play();
-            dancers.push(newDancer);
-            scene.add(newDancer);
-            console.log(dancers);
-            break;
-        case 83:
-            if(objSonidos[0].isPlaying){
-                objSonidos[0].stop();
-            }
-            objSonidos[0].play();
-            timer = 80;
-            break;
-        case 68: 
-            if(objSonidos[1].isPlaying){
-                objSonidos[1].stop();
-            }
-            objSonidos[1].play();
-            timer = 80;
-            break;
-        case 70: 
-            if(objSonidos[2].isPlaying){
-                objSonidos[2].stop();
-            }
-            objSonidos[2].play();
-            timer = 80;
-            break;
-        case 71: 
-            if(objSonidos[3].isPlaying){
-                objSonidos[3].stop();
-            }
-            objSonidos[3].play();
-            timer = 80;
-            break;
-        case 72: 
-            if(objSonidos[4].isPlaying){
-                objSonidos[4].stop();
-            }
-            objSonidos[4].play();
-            timer = 80;
-            break;
-        case 74: 
-            if(objSonidos[5].isPlaying){
-                objSonidos[5].stop();
-            }
-            objSonidos[5].play();
-            timer = 80;
-            break;
-        case 75: 
-            if(objSonidos[6].isPlaying){
-                objSonidos[6].stop();
-            }
-            objSonidos[6].play();
-            timer = 80;
-            break;
-        case 76: 
-            if(objSonidos[7].isPlaying){
-                objSonidos[7].stop();
-            }
-            objSonidos[7].play();
-            timer = 80;
-            break;
+    if(LOADED_ANIMATIONS){
+        var color = ""
+        switch(event.keyCode)
+        {
+            /*case 65:
+                console.log("Cloning dancer");
+                let newDancer = cloneFbx(dancer);
+                newDancer.mixer =  new THREE.AnimationMixer( scene );
+                let action = newDancer.mixer.clipAction( newDancer.animations[ 0 ], newDancer );
+                action.play();
+                dancers.push(newDancer);
+                scene.add(newDancer);
+                console.log(dancers);
+                break;*/
+            case 83:
+                if(objSonidos[0].isPlaying){
+                    objSonidos[0].stop();
+                }
+                objSonidos[0].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[0].material.color.set(color);
+                pistas.children[0].material.color.set(color);
+                break;
+            case 68: 
+                if(objSonidos[1].isPlaying){
+                    objSonidos[1].stop();
+                }
+                objSonidos[1].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[1].material.color.set(color);
+                pistas.children[1].material.color.set(color);
+                break;
+            case 70: 
+                if(objSonidos[2].isPlaying){
+                    objSonidos[2].stop();
+                }
+                objSonidos[2].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[2].material.color.set(color);
+                pistas.children[2].material.color.set(color);
+                break;
+            case 71: 
+                if(objSonidos[3].isPlaying){
+                    objSonidos[3].stop();
+                }
+                objSonidos[3].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[3].material.color.set(color);
+                pistas.children[3].material.color.set(color);
+                break;
+            case 72: 
+                if(objSonidos[4].isPlaying){
+                    objSonidos[4].stop();
+                }
+                objSonidos[4].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[4].material.color.set(color);
+                pistas.children[4].material.color.set(color);
+                break;
+            case 74: 
+                if(objSonidos[5].isPlaying){
+                    objSonidos[5].stop();
+                }
+                objSonidos[5].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[5].material.color.set(color);
+                pistas.children[5].material.color.set(color);
+                break;
+            case 75: 
+                if(objSonidos[6].isPlaying){
+                    objSonidos[6].stop();
+                }
+                objSonidos[6].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[6].material.color.set(color);
+                pistas.children[6].material.color.set(color);
+                break;
+            case 76: 
+                if(objSonidos[7].isPlaying){
+                    objSonidos[7].stop();
+                }
+                objSonidos[7].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[7].material.color.set(color);
+                pistas.children[7].material.color.set(color);
+                break;
+        }
     }
 }
 function notasPathLoader(nota_path, index){
@@ -161,18 +205,30 @@ function animate()
     currentTime = now;
     timer--;
     if(timer > 0){
-        if ( dancers.length > 0) 
+        if ( dancers.length >= 8) 
         {
             for(var dancer_i of dancers)
-                dancer_i.mixer.update( ( deltat ) * 0.001 );
+                dancer_i.visible=false;
+            dancers[bailador].visible=true
+            dancers[bailador].mixer.update( ( deltat ) * 0.001 );
+        }
+    }else{
+        while(bailadorOld==bailador){
+        bailador = Math.random() * (8 -1) +1; 
+        bailador = Math.trunc(bailador)
+        }
+        bailadorOld=bailador
+        if(dancers.length>1){
+            for(var dancer_i of dancers)
+                    dancer_i.visible=false;
+            dancers[0].visible=true
+            dancers[0].mixer.update( ( deltat ) * 0.001 );
+        }
+        for(i = 0; i<8; i++){
+            xilofonoG.children[i].material.color.setHex(0xE14A4A);
+            pistas.children[i].material.color.setHex(0xFFFFFF);
         }
     }
-    
-    // if ( dancers.length > 0) 
-    // {
-    //     for(dancer_i of dancers)
-    //         dancer_i.mixer.update( ( deltat ) * 0.001 );
-    // }
 }
 
 function run() 
@@ -180,12 +236,21 @@ function run()
     requestAnimationFrame(function() { run(); });
     
     // Render the scene
-    renderer.render( scene, camera );
+    if(ANIMATIONS_LOADED){
+        composer.render();
+    }else{
+        renderer.render( scene, camera );
+    }
 
-    // Animar al bailarin en el centro de la escena
-    animate();
-    // Update the camera controller
-    orbitControls.update();
+    orbitControls.enabled = ANIMATIONS_LOADED
+    if(ANIMATIONS_LOADED){
+        // Animar al bailarinen el centro de la escena
+        animate();
+        // Update the camera controller
+        orbitControls.update();
+        grupoLoading.visible=false
+        document.getElementById("title").textContent = "Pepito el Xilofonito";
+    }
 }
 function reproducirNota(){
     console.log("Hola soy una nota");
@@ -230,8 +295,40 @@ function createScene(canvas) {
 
     // Add  a camera so we can view the scene
     camera = new THREE.PerspectiveCamera( 45, canvas.width / canvas.height, 1, 4000 );
+    console.log("canvas"+canvas.width)
     camera.position.set(-5, 30, 80);
     scene.add(camera);
+    
+    let planoOfusco = new THREE.PlaneGeometry( canvas.width, canvas.height, 10 );
+    let materialOfusco = new THREE.MeshPhongMaterial({
+        color:0xFFFFFF,
+        opacity: 0.5,
+        transparent: true,
+    });
+    let planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
+    planoOfucoMesh.position.set(0,0,-70)
+    grupoLoading.add(planoOfucoMesh)
+
+
+    planoOfusco = new THREE.PlaneGeometry( 5.5, 0.8, 10 );
+    materialOfusco = new THREE.MeshPhongMaterial({
+        color:0xE0D070,
+    });
+    planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
+    planoOfucoMesh.position.set(0,0,-10)
+    grupoLoading.add(planoOfucoMesh)
+
+
+    planoOfusco = new THREE.PlaneGeometry( 0.01, 0.5, 10 );
+    materialOfusco = new THREE.MeshPhongMaterial({
+        color:0x1748F7,
+    });
+    planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
+    planoOfucoMesh.position.set(0,0,-9)
+    grupoLoading.add(planoOfucoMesh)
+
+    camera.add(grupoLoading)
+
 
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
     orbitControls.target = new THREE.Vector3(0,20,0);
@@ -248,8 +345,8 @@ function createScene(canvas) {
     
     //Luces del ambiente, que cambiarán a través del tiempo
 
-    spotLight1 = new THREE.SpotLight (0x00fa00);
-    spotLight1.position.set(40, 70, -10);
+    spotLight1 = new THREE.SpotLight (0xffffff);
+    spotLight1.position.set(-5, 30, 80);
     spotLight1.target.position.set(-2, 0, -2);
     spotLights.push(spotLight1);
     root.add(spotLight1);
@@ -328,13 +425,12 @@ function createScene(canvas) {
             new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("../images/skybox/baseAbajo.jpg"),side: THREE.DoubleSide}),
             new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("../images/skybox/baseDer.jpg"),side: THREE.DoubleSide}),
             new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("../images/skybox/baseIzq.jpg"),side: THREE.DoubleSide})
-
         ];
         //se crea el material del cubo normal y se le aÃ±ade al cubo para despues agregarlo a la escena y presto
         var cubeMaterial = new THREE.MeshFaceMaterial(skymateriales);
         var cube = new THREE.Mesh(skyGeometry,cubeMaterial)
         
-       // scene.add(cube)
+        scene.add(cube)
     //fin de crear el skybox
 
 
@@ -360,6 +456,7 @@ function createScene(canvas) {
             //aÃ±adimos ese mesh al objeto vacio pistas, ya que este es el objeto que agregaremos a la escena y no cada pista por separado
             pistas.add(plane);
             /*aqui rehacemos lo mismo de arriba solo para otro plano por debajo de el otro*/
+            var material = new THREE.MeshPhongMaterial( {color: 0xffffff,side: THREE.DoubleSide} );
             var planes = new THREE.Mesh( geometry, material );
             planes.position.set(-desplazamiento+lado*i,0,lado/2);
             planes.rotation.x = -Math.PI / 2;
@@ -373,10 +470,10 @@ function createScene(canvas) {
 
     //crear el xilofono
     var geometry = new THREE.BoxGeometry( 5,8,10 );
-    var material = new THREE.MeshBasicMaterial( {color: 0xC8C8C8} );
     var posxbox = -32
     var scaleybox = .8
     for(i=0;i<8;i++){
+        var material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
         posxbox+=7
         scaleybox+=.2
         box = new THREE.Mesh( geometry, material );
@@ -412,6 +509,8 @@ function createScene(canvas) {
     //Llamo la función del cambio de luces para que se repita cada 5000 milisegundos
     setInterval(luces, 5000)
     
+    addEffects();
+
     // Now add the group to our scene
     scene.add( root );
 }
@@ -436,10 +535,10 @@ function luces( ){
         colorHex2="#1866D3"
         colorHex3="#25E907"
     }
-    spotLights[0].color.set(colorHex)
+    //spotLights[0].color.set(colorHex)
     spotLights[1].color.set(colorHex2)
     spotLights[2].color.set(colorHex3)
-    console.log("hola")
+    console.log("cambio de luces")
     // Now add the group to our scene
     scene.add( root );
 }
@@ -491,18 +590,138 @@ function onDocumentMouseMove( event )
 function onDocumentMouseClick( event ) {
 
     event.preventDefault();
-    console.log("entre");
+    //console.log("entre");
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
  //   console.log(mouse);console.log(camera);
     raycaster.setFromCamera( mouse, camera );
     const intersects = raycaster.intersectObjects( xilofonoG.children );
-    console.log(intersects);
+    console.log("intersects"+intersects);
     if ( intersects.length > 0 ) {
 
         const object = intersects[ intersects.length -1 ].object;
         console.log(object)
+        switch(object.name)
+        {
+          
+            case "tecla1":
+                if(objSonidos[0].isPlaying){
+                    objSonidos[0].stop();
+                }
+                objSonidos[0].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[0].material.color.set(color);
+                pistas.children[0].material.color.set(color);
+                break;
+            case "tecla2": 
+                if(objSonidos[1].isPlaying){
+                    objSonidos[1].stop();
+                }
+                objSonidos[1].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[1].material.color.set(color);
+                pistas.children[1].material.color.set(color);
+                break;
+            case "tecla3": 
+                if(objSonidos[2].isPlaying){
+                    objSonidos[2].stop();
+                }
+                objSonidos[2].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[2].material.color.set(color);
+                pistas.children[2].material.color.set(color);
+                break;
+            case "tecla4": 
+                if(objSonidos[3].isPlaying){
+                    objSonidos[3].stop();
+                }
+                objSonidos[3].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[3].material.color.set(color);
+                pistas.children[3].material.color.set(color);
+                break;
+            case "tecla5": 
+                if(objSonidos[4].isPlaying){
+                    objSonidos[4].stop();
+                }
+                objSonidos[4].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[4].material.color.set(color);
+                pistas.children[4].material.color.set(color);
+                break;
+            case "tecla6": 
+                if(objSonidos[5].isPlaying){
+                    objSonidos[5].stop();
+                }
+                objSonidos[5].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[5].material.color.set(color);
+                pistas.children[5].material.color.set(color);
+                break;
+            case "tecla7": 
+                if(objSonidos[6].isPlaying){
+                    objSonidos[6].stop();
+                }
+                objSonidos[6].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[6].material.color.set(color);
+                pistas.children[6].material.color.set(color);
+                break;
+            case "tecla8": 
+                if(objSonidos[7].isPlaying){
+                    objSonidos[7].stop();
+                }
+                objSonidos[7].play();
+                timer = 80;
+                color = colorHEX()
+                xilofonoG.children[7].material.color.set(color);
+                pistas.children[7].material.color.set(color);
+                break;
+        }
 
     }
 
+}
+
+
+function generarLetra(){
+	var letras = ["a","b","c","d","e","f","0","1","2","3","4","5","6","7","8","9"];
+	var numero = (Math.random()*15).toFixed(0);
+	return letras[numero];
+}
+	
+function colorHEX(){
+	var coolor = "";
+	for(var i=0;i<6;i++){
+		coolor = coolor + generarLetra() ;
+	}
+	return "#" + coolor;
+}
+
+function addEffects()
+{
+    // First, we need to create an effect composer: instead of rendering to the WebGLRenderer, we render using the composer.
+    composer = new THREE.EffectComposer(renderer);
+
+    // The effect composer works as a chain of post-processing passes. These are responsible for applying all the visual effects to a scene. They are processed in order of their addition. The first pass is usually a Render pass, so that the first element of the chain is the rendered scene.
+    const renderPass = new THREE.RenderPass(scene, camera);
+
+    // There are several passes available. Here we are using the UnrealBloomPass.
+    bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+        bloomPass.threshold = 0;
+        bloomPass.strength = 0.3;
+        bloomPass.radius = 0;
+
+    renderer.toneMappingExposure = Math.pow( 0.5, 1.0 );
+    
+    // After the passes are configured, we add them in the order we want them.
+    composer.addPass(renderPass);
+    composer.addPass(bloomPass);
 }

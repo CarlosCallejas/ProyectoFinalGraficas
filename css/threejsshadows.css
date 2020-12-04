@@ -6,6 +6,7 @@ body{
 #title {
 	position:absolute;
 	left:20px;
+	font-size: large;
 	top:20px;
 }
 #title1 {
