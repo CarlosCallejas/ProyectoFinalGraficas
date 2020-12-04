@@ -600,7 +600,7 @@ function createScene(canvas) {
     //fin de crear el xilofono   
     
     //Inicia Events listeners   
-    document.addEventListener('mousemove', onDocumentMouseMove);
+
     document.addEventListener('click', onDocumentMouseClick);
     //Termina Event listeners
    
@@ -641,11 +641,6 @@ function luces( ){
     console.log("cambio de luces")
     // Now add the group to our scene
     scene.add( root );
-}
-
-function onDocumentMouseMove( event ) 
-{
-    event.preventDefault();
 }
 
 
