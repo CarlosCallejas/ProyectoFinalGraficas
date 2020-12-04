@@ -1,45 +1,30 @@
+//-----variables-----
+//---escena---
+//variables generales de la escena
+//en la variable group se guardan las pistas 
 let renderer = null, 
 scene = null, 
 camera = null,
 root = null,
-dancer = null,
 group = null,
-raycaster =null,
-orbitControls = null,
+orbitControls = null
+
+//---interacción con el mouse---
+//variables de interaccion con el mouse
+let raycaster =null,
 mixer = null;
 let mouse = new THREE.Vector2(), INTERSECTED, CLICKED;
-let box = null
 
-
+//---obj (dancer)---
+//estas variables se ocupa para crear a los diferentes bailarines
+let dancer = null
+let dancers = [];
+//estas se usan para la animación del dancer
 let duration = 20000; // ms
 let currentTime = Date.now();
-let dancers = [];
-
-let objSonidos = [];
-let notasPath = [];
-let listener, audioLoader;
-
-let directionalLight = null;
-let spotLight = null;
-let ambientLight = null;
-let mapUrl = "../images/checker_large.gif";
-let timer = 0;
-// let tiempos = 0;
+//estas se ocupan para asegurar que cada vez que descansa el dancer empiece con una animación diferente
 var bailador = 1
 var bailadorOld = 1
-let spotLights = [];
-let spotlightHelper=null
-let spotlightHelper2=null
-let spotlightHelper3=null
-
-//pista
-//objeto THREE vacio con el cual vamos a aÃ±adir todas las pistas a la escena
-let pistas = new THREE.Object3D;
-
-//xilofono
-let xilofonoG = new THREE.Object3D;
-let grupoLoading = new THREE.Object3D;
-
 //Son todos los archivos que contienen las animaciones del personaje del proyecto, sus diferentes bailes
 let animatios = ["../models/dancer/fbx/idle.fbx", 
                 "../models/dancer/fbx/Hip Hop Dancing.fbx",
@@ -54,17 +39,57 @@ let animatios = ["../models/dancer/fbx/idle.fbx",
 var LOADED_ANIMATIONS = 0
 var ANIMATIONS_LOADED = false
 
+
+//---sonidos (notas)---
+//guarda los sonidos
+let objSonidos = [];
+//tiene las referencias a los sonidos
+let notasPath = [];
+//son necesarios para la reproduccion del sonido, listener para que suene el sonido, cargar sonidos (respectivamente)
+let listener, audioLoader;
+//se ocupa para elegir si sonara la guitarra o el xilofono
+let guitarra = false
+
+//---pista (de baile)---
+//se va a colorear cada pista por separado dependiendo de la nota que se toque
+//objeto THREE vacio con el cual vamos a aÃ±adir todas las pistas a la escena
+let pistas = new THREE.Object3D;
+//variable para crear pista por pista
+let box = null
+
+//esta variable es para determinar cuanto tiempo va a bailar el dancer y cuanto tiempo se quedaran pintadas las notas y pistas
+let timer = 0;
+
+//---Luces---
+let directionalLight = null;
+let spotLight = null;
+let ambientLight = null;
+let spotLights = [];
+let spotlightHelper=null
+let spotlightHelper2=null
+let spotlightHelper3=null
 let SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 2048;
 
+
+//---xilofono---
+//guarda todas las notas del xilofono que siempre estan en primer plano
+let xilofonoG = new THREE.Object3D;
+
+//---pantalla de cargando--- 
+//guarda los 3 planos para mostrar la barra de carga
+let grupoLoading = new THREE.Object3D;
+
+//---postprocessing---
 let composer = null, bloomPass = null, gui = null;
 
-
+//-----funciones-----
 //Función encargada de cargar los archivos de las animaciones en el proyecto, para que pueda visualizarse
 //al personaje con su animación especificada
 async function loadFBX()
 {
     let loader = promisifyLoader(new THREE.FBXLoader());
 
+    //el ciclo es para que desde el inicio se carguen todas la animaciones
     for(var i=0; i<9; i++){
         console.log(i)
         try{
@@ -81,10 +106,14 @@ async function loadFBX()
                 }
             } );
             dancer = object;
+            //metemos cada dancer en una lista para tenerlos en oren
             dancers.push(dancer);
+            //lo agregamos a la escena para que se vea
             scene.add( object );
+            //esto es para saber cuantos ya se cargaron 
             LOADED_ANIMATIONS++;
             console.log("progressbar: "+LOADED_ANIMATIONS/9*100+"%")
+            //aqui cambiamos la escala de la progressbar para que se vea el progreso
             grupoLoading.children[2].scale.x += 52
         }
         catch(err)
@@ -92,28 +121,65 @@ async function loadFBX()
             console.error( err );
         }
     }
+    //ya que se termina el ciclo indicamos que se cargaron todas las animaciones
     ANIMATIONS_LOADED = true
 }
 
+//funcion para que se puedan tocar las notas y cambiar el instrumento con el teclado
 function onKeyDown(event)
 {
+    //solo te permite empezar a tocar si ya se cargaron todas las animaciones
     if(LOADED_ANIMATIONS){
         var color = ""
         switch(event.keyCode)
         {
-           //Detectar qué tecla presionó y reproducir la nota correcta
+            //con la letra 'A' se cambia entre guitarra y xiolofono
+            case 65:
+                //si guitarra es falso quiere decir que estaba tocando el xilofono por lo tanto hay que cargar la guitarra 
+                //(siempre empieza con xilofono)
+                if(!guitarra){
+                    //limpiamos la variable de los sonidos y la volvemos a inicializar con THREE.Audio
+                    objSonidos = []
+                    objSonidos = [
+                        new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), 
+                        new THREE.Audio( listener ), new THREE.Audio( listener )
+                    ];
+                    //cargamos las notas de la guitarra
+                    //(guardadas en la variable notasPathG)
+                    notasPathG.forEach(notasPathLoader);
+                    //indicamos que esta tocando guitarra
+                    guitarra=true
+                } else {
+                    //se hace lo mismo que en el if anterior pero esta vez con las notas del xilofono
+                    //(notasPath)
+                    objSonidos = []
+                    objSonidos = [
+                        new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), new THREE.Audio( listener ), new THREE.Audio( listener ),  new THREE.Audio( listener ), 
+                        new THREE.Audio( listener ), new THREE.Audio( listener )
+                    ];
+                    notasPath.forEach(notasPathLoader);
+                    //indicamos que esta tocando xilofono
+                    guitarra=false
+                }
+                break;
+           //Detectar qué tecla presionó (de la 's' a la 'l') y reproducir la nota correcta
            //Además, se colorea la tecla del xilofono y la pista de baile de un color aleatorio
            //En todos los casos se hace lo mismo
             case 83:
                 //Tecla 1
-                if(objSonidos[0].isPlaying){ //Si se está reproduciendo se detiene y se vuelve a reproducir
+                if(objSonidos[0].isPlaying){ 
+                    //Si se está reproduciendo se detiene y se vuelve a reproducir
                     objSonidos[0].stop();
                 }
-                objSonidos[0].play();//Se reproduce la nota
-                timer = 80; //Timer para controlar el tiempo que está bailando el personaje
+                //Se reproduce la nota
+                objSonidos[0].play();
+                //Timer para controlar el tiempo que está bailando el personaje
+                timer = 80; 
+                //seteamos el color de manera aleatoria con la funcion colorHEX
                 color = colorHEX()
-                //modificar el color de la nota que tocaste y la pista de baile
+                //modificar el color de la nota que tocaste 
                 xilofonoG.children[0].material.color.set(color);
+                //modificar el color de la pista de baile
                 pistas.children[0].material.color.set(color);
                 break;
             case 68: 
@@ -189,65 +255,90 @@ function onKeyDown(event)
         }
     }
 }
+//funcion para cargar las notas dependiendo del path que se le pase
 function notasPathLoader(nota_path, index){
     cargarPista(objSonidos[index], nota_path);
 }
+//funcion para la animacion del dancer
 function animate() 
 {
     let now = Date.now();
     let deltat = now - currentTime;
     currentTime = now;
-    //Empieza animacion del personaje, mientras haya musica y el timer lo permita, baila
+    //Se disminuye el timer para que solo baile un cierto tiempo 
     timer--;
+    //si el timer es mayor a 0 sigue bailando
     if(timer > 0){
         if ( dancers.length >= 8) 
         {
+            //ponemos invisibles todos los dancers
             for(var dancer_i of dancers)
                 dancer_i.visible=false;
+            //se pone el dancer elegido (bailador) para mostrar la animacion como visible
             dancers[bailador].visible=true
+            //se reproduce la animacion de bailador
             dancers[bailador].mixer.update( ( deltat ) * 0.001 );
         }
     }else{
+        //--animacion de idle y eleccion de bailador--
+        //aqui elegimos el bailador
+        //con el while aseguramos que cada vez sea una animacion diferente
         while(bailadorOld==bailador){
-        bailador = Math.random() * (8 -1) +1; 
-        bailador = Math.trunc(bailador)
+            //generamos un aleatorio de los dancers (8) para ver que animacion se genera despues
+            bailador = Math.random() * (8 -1) +1; 
+            //se pone ese numero entero en bailador para ser el indice en la parte de la animacion
+            bailador = Math.trunc(bailador)
         }
         bailadorOld=bailador
+        //con esto empieza la animación de idle 
+        //(es lo mismo que en las animaciones de baile pero esta vez se selecciona el indice 0)
         if(dancers.length>1){
             for(var dancer_i of dancers)
                     dancer_i.visible=false;
             dancers[0].visible=true
             dancers[0].mixer.update( ( deltat ) * 0.001 );
         }
+        //aca seteamos los colores de las pistas y el xilofono de regreso a sus colores iniciales
         for(i = 0; i<8; i++){
+            //rojo
             xilofonoG.children[i].material.color.setHex(0xE14A4A);
+            //blanco
             pistas.children[i].material.color.setHex(0xFFFFFF);
         }
     }
-    //termina animacion del personaje principal
+    //termina animacion del personaje
 }
 
+//funcion para correr todo
 function run() 
 {
     requestAnimationFrame(function() { run(); });
     
     // Render the scene
     if(ANIMATIONS_LOADED){
+        //si ya se cargaron todos los dancers se renderiza con el composer para agregar el postprocessing
         composer.render();
     }else{
+        //si aun no se han cargado se renderiza con el render normal
+        //esto para que se pueda ver bien la pantalla de carga
         renderer.render( scene, camera );
     }
 
+    //si aun no se han terminado de cargar las animaciones se deshabilita el orbitController
     orbitControls.enabled = ANIMATIONS_LOADED
+    //las animaciones solo empiezan si ya se cargaron todos los dancers
     if(ANIMATIONS_LOADED){
         // Animar al bailarinen el centro de la escena
         animate();
         // Update the camera controller
         orbitControls.update();
+        //se pone como invisible la pantalla de carga
         grupoLoading.visible=false
+        //cambia el titulo de 'cargando...' al nombre del proyecto
         document.getElementById("title").textContent = "Pepito el Xilofonito";
     }
 }
+//con esta funcion se cargan las notas
 function cargarPista(objSonido, path,  volumen = 0.8){
    //Recibe un objeto sonido, una ruta y el volumen al que se reproducira un sonido
    //Esencialmente fue diseñado para reproducir notas musicales
@@ -258,6 +349,7 @@ function cargarPista(objSonido, path,  volumen = 0.8){
         objSonido.setVolume( volumen );
     }); 
 }
+//con esto se setea la musica de fondo (el beat)
 function setBackgroundMusic(){
     // create an audio source
     let sound = new THREE.Audio( listener );
@@ -272,6 +364,8 @@ function setBackgroundMusic(){
         sound.play();
     }); 
 }
+
+//funcion para crear la escena
 function createScene(canvas) {
     
     // Create the Three.js renderer and attach it to our canvas
@@ -294,18 +388,19 @@ function createScene(canvas) {
     camera.position.set(-5, 30, 80);
     scene.add(camera);
     
+    //--creacion de la pantalla de carga--
     let planoOfusco = new THREE.PlaneGeometry( canvas.width, canvas.height, 10 );
+    //le ponemos transparencia para que se vea un poco de la escena principal
     let materialOfusco = new THREE.MeshPhongMaterial({
         color:0xFFFFFF,
         opacity: 0.5,
         transparent: true,
     });
-    //Se agregan los efectos de camara
     let planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
     planoOfucoMesh.position.set(0,0,-70)
+    //todo se agrega al grupoLoading
     grupoLoading.add(planoOfucoMesh)
-
-
+    //creacion de la base de la barra de carga
     planoOfusco = new THREE.PlaneGeometry( 5.5, 0.8, 10 );
     materialOfusco = new THREE.MeshPhongMaterial({
         color:0xE0D070,
@@ -313,8 +408,7 @@ function createScene(canvas) {
     planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
     planoOfucoMesh.position.set(0,0,-10)
     grupoLoading.add(planoOfucoMesh)
-
-
+    //creacion de la barra de carga
     planoOfusco = new THREE.PlaneGeometry( 0.01, 0.5, 10 );
     materialOfusco = new THREE.MeshPhongMaterial({
         color:0x1748F7,
@@ -322,10 +416,11 @@ function createScene(canvas) {
     planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
     planoOfucoMesh.position.set(0,0,-9)
     grupoLoading.add(planoOfucoMesh)
-
+    //agregamos a la camara el grupo para que este en primer plano
     camera.add(grupoLoading)
+    //--fin de crear pantalla de carga--
 
-
+    //--orbitController--
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
     orbitControls.target = new THREE.Vector3(0,20,0);
     //aqui limitamos el zoom del orbit controller para que no salga del skybox
@@ -335,12 +430,13 @@ function createScene(canvas) {
     orbitControls.autoRotate = false;
     //con esto quitamos el pan para que la camara no salga del skybox (y por que siento que se ve mas guapo asÃ­)
     orbitControls.enablePan = false;
-        
+    //--final de crear orbitController--
+
     // Create a group to hold all the objects
     root = new THREE.Object3D;
     
+    //--luces--
     //Luces del ambiente, que cambiarán a través del tiempo
-
     spotLight1 = new THREE.SpotLight (0xffffff);
     spotLight1.position.set(-5, 30, 80);
     spotLight1.target.position.set(-2, 0, -2);
@@ -373,7 +469,9 @@ function createScene(canvas) {
 
     ambientLight = new THREE.AmbientLight ( 0x222222 );
     root.add(ambientLight);
+    //--final de crear luces--
 
+    //--interaccion con el mouse y sonido--
     //Se inicializa el raycaster para detectar la colision de la baqueta y la tecla del xilofono
     raycaster = new THREE.Raycaster();
     //Se incializa un listener para el audio
@@ -389,32 +487,26 @@ function createScene(canvas) {
     camera.add( listener ); 
     // Set background music
     setBackgroundMusic();
-    // Create the objects
-     loadFBX();
-
     // Cargar notas musicales 
     notasPath = [
         "../sounds/notas/nota1.mp3", "../sounds/notas/nota2.mp3", "../sounds/notas/nota3.mp3", "../sounds/notas/nota4.mp3", 
         "../sounds/notas/nota5.mp3", "../sounds/notas/nota6.mp3", "../sounds/notas/nota7.mp3", "../sounds/notas/nota8.mp3"  
     ];
-    // notasPath = [
-    //     "../sounds/notas/nota1_guitar.mp3", "../sounds/notas/nota2_guitar.mp3", "../sounds/notas/nota3_guitar.mp3", "../sounds/notas/nota4_guitar.mp3", 
-    //     "../sounds/notas/nota5_guitar.mp3", "../sounds/notas/nota6_guitar.mp3", "../sounds/notas/nota7_guitar.mp3", "../sounds/notas/nota8_guitar.mp3"  
-    // ];
-
+    notasPathG = [
+        "../sounds/notas/nota1_guitar.mp3", "../sounds/notas/nota2_guitar.mp3", "../sounds/notas/nota3_guitar.mp3", "../sounds/notas/nota4_guitar.mp3", 
+        "../sounds/notas/nota5_guitar.mp3", "../sounds/notas/nota6_guitar.mp3", "../sounds/notas/nota7_guitar.mp3", "../sounds/notas/nota8_guitar.mp3"  
+    ];
     //Cargar las 8 notas musicales
     notasPath.forEach(notasPathLoader);
-
+    //--fin de creacion de interaccion de mouse y sonidos--
+   
+    //--carga de objetos--
+     loadFBX();
     // Create a group to hold the objects
     group = new THREE.Object3D;
     root.add(group);
 
-
-
-
-    ///Aqui se crean todos lo objetos(excepto luces y camara) que iran en la escena
-
-    //crear el skybox
+    //--crear el skybox--
         //El skybox es basicamente un mega cubo que encierra todo asi que por eso es tan grande 
         var skyGeometry = new THREE.CubeGeometry(1000,1000,1000)
         /*se declaran las texturas y se agregan a una lista con la que se le pondrÃ¡n las texturas al cubo "skybox"*/
@@ -432,10 +524,10 @@ function createScene(canvas) {
         var cube = new THREE.Mesh(skyGeometry,cubeMaterial)
         
         scene.add(cube)
-    //fin de crear el skybox
+    //--fin de crear el skybox--
 
 
-    //crear las pistas
+    //--crear las pistas--
         //definimos el tamaÃ±o de los lados de cada plano con lado 
         let lado = 60
         //desplazamiento se refiere a la cantidad de espacio que se mueve cada plano
@@ -467,22 +559,28 @@ function createScene(canvas) {
             pistas.add(planes);
         }
         group.add( pistas );
-    //fin de crear pistas
+    //--fin de crear pistas--
 
-    //crear el xilofono
+    //--crear el xilofono--
+    //seteamos valores generales
     var geometry = new THREE.BoxGeometry( 5,8,10 );
+    //se ocupan para cambiar la posicion y la escala (entre más a la derecha más alto)
     var posxbox = -32
     var scaleybox = .8
     for(i=0;i<8;i++){
         var material = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+        //modificación de posicion (más a la derecha)
         posxbox+=7
+        //modificación de escala (entre más a la derecha más alto)
         scaleybox+=.2
         box = new THREE.Mesh( geometry, material );
         box.position.set(posxbox, -17, -50);
         box.scale.set(1,scaleybox,1)
         xilofonoG.add(box)   
     }
+    //se tuvo que hacer la rotación a manita para que se viera que estaba de frente ya que no habia un numero exacto de rotacion para hacerlo en ciclo
     xilofonoG.children[0].rotation.set(0,0.4,0)
+    //se le puso nombre a cada tecla
     xilofonoG.children[0].name = ("tecla1");
     xilofonoG.children[1].rotation.set(0,0.335,0)
     xilofonoG.children[1].name = ("tecla2");
@@ -505,11 +603,11 @@ function createScene(canvas) {
     document.addEventListener('mousemove', onDocumentMouseMove);
     document.addEventListener('click', onDocumentMouseClick);
     //Termina Event listeners
-
-    ///aqui termina la creación de objetos    
+   
     //Llamo la función del cambio de luces para que se repita cada 5000 milisegundos
     setInterval(luces, 5000)
     
+    //se agregan los efectos del postprocessing
     addEffects();
 
     // Now add the group to our scene
@@ -523,6 +621,7 @@ function luces( ){
     var colorHex2
     var colorHex3
 
+    //se eligieron ciertos colores para el cambio de luces y se seteo a cada rango del random
     if(color<=0.4){
         colorHex="#242DD8"
         colorHex2="#FFE307"
@@ -543,16 +642,15 @@ function luces( ){
     // Now add the group to our scene
     scene.add( root );
 }
+
 function onDocumentMouseMove( event ) 
 {
     event.preventDefault();
-
-    
 }
 
 
+//FUNCION PARA DETECTAR CUANDO DA CLICK A UNA TECLA DEL XILOFONO
 function onDocumentMouseClick( event ) {
-    //FUNCION PARA DETECTAR CUANDO DA CLICK A UNA TECLA DEL XILOFONO
     event.preventDefault();
     //Calculos para unificar coordenadas del mouse
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -563,7 +661,6 @@ function onDocumentMouseClick( event ) {
     const intersects = raycaster.intersectObjects( xilofonoG.children );
     console.log("intersects"+intersects);
     if ( intersects.length > 0 ) {
-
         const object = intersects[ intersects.length -1 ].object;
         console.log(object)
         switch(object.name)
@@ -576,6 +673,7 @@ function onDocumentMouseClick( event ) {
                 if(objSonidos[0].isPlaying){
                     objSonidos[0].stop(); 
                 }
+                //esto es muy parecido al switch case del teclado
                 objSonidos[0].play();
                 timer = 80;
                 color = colorHEX()
@@ -659,21 +757,25 @@ function onDocumentMouseClick( event ) {
 
 }
 
-
-function generarLetra(){
-	var letras = ["a","b","c","d","e","f","0","1","2","3","4","5","6","7","8","9"];
-	var numero = (Math.random()*15).toFixed(0);
-	return letras[numero];
-}
-	
+//esta funcion se utiliza para generar un color hexadecimal aleatorio	
 function colorHEX(){
-	var coolor = "";
+    var color = "";
+    //se corre 6 veces la funcion de generarvalor para completar el color hexadecimal
 	for(var i=0;i<6;i++){
-		coolor = coolor + generarLetra() ;
+		color = color + generarValor() ;
 	}
-	return "#" + coolor;
+	return "#" + color;
 }
 
+//esta funcion genera un valor entre a y 9 de manera aleatoria
+function generarValor(){
+	var valores = ["a","b","c","d","e","f","0","1","2","3","4","5","6","7","8","9"];
+	var numero = (Math.random()*15).toFixed(0);
+	return valores[numero];
+}
+
+//funcion para agregar el post processing
+//tiene partes del codigo usado en clase y partes de ThreeJs.org
 function addEffects()
 {
     // First, we need to create an effect composer: instead of rendering to the WebGLRenderer, we render using the composer.
@@ -689,7 +791,6 @@ function addEffects()
         bloomPass.radius = 0;
 
     renderer.toneMappingExposure = Math.pow( 0.5, 1.0 );
-    
     // After the passes are configured, we add them in the order we want them.
     composer.addPass(renderPass);
     composer.addPass(bloomPass);
