@@ -80,7 +80,6 @@ async function loadFBX()
                     child.receiveShadow = true;
                 }
             } );
-           // console.log(object.animations);
             dancer = object;
             dancers.push(dancer);
             scene.add( object );
@@ -102,23 +101,18 @@ function onKeyDown(event)
         var color = ""
         switch(event.keyCode)
         {
-            /*case 65:
-                console.log("Cloning dancer");
-                let newDancer = cloneFbx(dancer);
-                newDancer.mixer =  new THREE.AnimationMixer( scene );
-                let action = newDancer.mixer.clipAction( newDancer.animations[ 0 ], newDancer );
-                action.play();
-                dancers.push(newDancer);
-                scene.add(newDancer);
-                console.log(dancers);
-                break;*/
+           //Detectar qué tecla presionó y reproducir la nota correcta
+           //Además, se colorea la tecla del xilofono y la pista de baile de un color aleatorio
+           //En todos los casos se hace lo mismo
             case 83:
-                if(objSonidos[0].isPlaying){
+                //Tecla 1
+                if(objSonidos[0].isPlaying){ //Si se está reproduciendo se detiene y se vuelve a reproducir
                     objSonidos[0].stop();
                 }
-                objSonidos[0].play();
-                timer = 80;
+                objSonidos[0].play();//Se reproduce la nota
+                timer = 80; //Timer para controlar el tiempo que está bailando el personaje
                 color = colorHEX()
+                //modificar el color de la nota que tocaste y la pista de baile
                 xilofonoG.children[0].material.color.set(color);
                 pistas.children[0].material.color.set(color);
                 break;
@@ -203,6 +197,7 @@ function animate()
     let now = Date.now();
     let deltat = now - currentTime;
     currentTime = now;
+    //Empieza animacion del personaje, mientras haya musica y el timer lo permita, baila
     timer--;
     if(timer > 0){
         if ( dancers.length >= 8) 
@@ -229,6 +224,7 @@ function animate()
             pistas.children[i].material.color.setHex(0xFFFFFF);
         }
     }
+    //termina animacion del personaje principal
 }
 
 function run() 
@@ -252,12 +248,10 @@ function run()
         document.getElementById("title").textContent = "Pepito el Xilofonito";
     }
 }
-function reproducirNota(){
-    console.log("Hola soy una nota");
-}
 function cargarPista(objSonido, path,  volumen = 0.8){
-    //Cargar un sonido como background y configurarlo como el Audio Object's buffer
-    //Como es musica para background se reproduce en bucle
+   //Recibe un objeto sonido, una ruta y el volumen al que se reproducira un sonido
+   //Esencialmente fue diseñado para reproducir notas musicales
+   //Carga los path en un objeto especifico para despues manipularlo. 
     audioLoader.load( path, function( buffer ) {
         objSonido.setBuffer( buffer );
         objSonido.setLoop( false );
@@ -265,15 +259,16 @@ function cargarPista(objSonido, path,  volumen = 0.8){
     }); 
 }
 function setBackgroundMusic(){
-    // create a global audio source
-    const sound = new THREE.Audio( listener );
-
+    // create an audio source
+    let sound = new THREE.Audio( listener );
     // load a sound and set it as the Audio object's buffer
-    const audioLoader = new THREE.AudioLoader();
-    audioLoader.load( '../sounds/background.mp3', function( buffer ) {
+     //Cargar un sonido como background y configurarlo como el Audio Object's buffer
+    //Como es musica para background se reproduce en bucle
+    let audioLoader = new THREE.AudioLoader();
+    audioLoader.load( '../sounds/background2.mp3', function( buffer ) {
         sound.setBuffer( buffer );
         sound.setLoop( true );
-        sound.setVolume( 0.5 );
+        sound.setVolume( 0.2 );
         sound.play();
     }); 
 }
@@ -305,6 +300,7 @@ function createScene(canvas) {
         opacity: 0.5,
         transparent: true,
     });
+    //Se agregan los efectos de camara
     let planoOfucoMesh = new THREE.Mesh( planoOfusco, materialOfusco );
     planoOfucoMesh.position.set(0,0,-70)
     grupoLoading.add(planoOfucoMesh)
@@ -392,19 +388,20 @@ function createScene(canvas) {
     //Se añade el listener a la camara
     camera.add( listener ); 
     // Set background music
-    //setBackgroundMusic();
+    setBackgroundMusic();
     // Create the objects
      loadFBX();
 
     // Cargar notas musicales 
-    // notasPath = [
-    //     "../sounds/notas/nota1.mp3", "../sounds/notas/nota2.mp3", "../sounds/notas/nota3.mp3", "../sounds/notas/nota4.mp3", 
-    //     "../sounds/notas/nota5.mp3", "../sounds/notas/nota6.mp3", "../sounds/notas/nota7.mp3", "../sounds/notas/nota8.mp3"  
-    // ];
     notasPath = [
-        "../sounds/notas/nota1_guitar.mp3", "../sounds/notas/nota2_guitar.mp3", "../sounds/notas/nota3_guitar.mp3", "../sounds/notas/nota4_guitar.mp3", 
-        "../sounds/notas/nota5_guitar.mp3", "../sounds/notas/nota6_guitar.mp3", "../sounds/notas/nota7_guitar.mp3", "../sounds/notas/nota8_guitar.mp3"  
+        "../sounds/notas/nota1.mp3", "../sounds/notas/nota2.mp3", "../sounds/notas/nota3.mp3", "../sounds/notas/nota4.mp3", 
+        "../sounds/notas/nota5.mp3", "../sounds/notas/nota6.mp3", "../sounds/notas/nota7.mp3", "../sounds/notas/nota8.mp3"  
     ];
+    // notasPath = [
+    //     "../sounds/notas/nota1_guitar.mp3", "../sounds/notas/nota2_guitar.mp3", "../sounds/notas/nota3_guitar.mp3", "../sounds/notas/nota4_guitar.mp3", 
+    //     "../sounds/notas/nota5_guitar.mp3", "../sounds/notas/nota6_guitar.mp3", "../sounds/notas/nota7_guitar.mp3", "../sounds/notas/nota8_guitar.mp3"  
+    // ];
+
     //Cargar las 8 notas musicales
     notasPath.forEach(notasPathLoader);
 
@@ -555,13 +552,14 @@ function onDocumentMouseMove( event )
 
 
 function onDocumentMouseClick( event ) {
-
+    //FUNCION PARA DETECTAR CUANDO DA CLICK A UNA TECLA DEL XILOFONO
     event.preventDefault();
-    //console.log("entre");
+    //Calculos para unificar coordenadas del mouse
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
- //   console.log(mouse);console.log(camera);
+    //mandar raycast cuando da click
     raycaster.setFromCamera( mouse, camera );
+    //mandar el raycast hacia todos los hijos del xilofono (que son las teclas)
     const intersects = raycaster.intersectObjects( xilofonoG.children );
     console.log("intersects"+intersects);
     if ( intersects.length > 0 ) {
@@ -570,14 +568,18 @@ function onDocumentMouseClick( event ) {
         console.log(object)
         switch(object.name)
         {
-          
-            case "tecla1":
+          //reproducir la nota adecuada
+           //Además, se colorea la tecla del xilofono y la pista de baile de un color aleatorio
+           //En todos los casos se hace lo mismo
+            case "tecla1":      
+                //Si ya se está reproduciendo la nota, se detiene y de vuelve a ejecutar      
                 if(objSonidos[0].isPlaying){
-                    objSonidos[0].stop();
+                    objSonidos[0].stop(); 
                 }
                 objSonidos[0].play();
                 timer = 80;
                 color = colorHEX()
+                //se colorea la tecla y la pista de baile
                 xilofonoG.children[0].material.color.set(color);
                 pistas.children[0].material.color.set(color);
                 break;
