@@ -133,7 +133,7 @@ function onKeyDown(event)
         var color = ""
         switch(event.keyCode)
         {
-            //con la letra 'A' se cambia entre guitarra y xiolofono
+            //con la letra 'A' se cambia entre guitarra y xilófono
             case 65:
                 //si guitarra es falso quiere decir que estaba tocando el xilofono por lo tanto hay que cargar la guitarra 
                 //(siempre empieza con xilofono)
